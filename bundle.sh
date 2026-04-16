@@ -3,7 +3,7 @@ set -e
 shopt -s nullglob
 
 assets=""
-here="$(realpath $(dirname ${BASH_SOURCE[0]}))"
+libdir="$(realpath $(dirname $(readlink -f ${BASH_SOURCE[0]})))"
 outdir=bundles
 
 while [[ $# -gt 0 ]]; do
@@ -124,7 +124,7 @@ fi
 
 
 # install.sh
-cp ${here}/target-install.sh ${bundledir}
+cp ${libdir}/target-install.sh ${bundledir}/install.sh
 chmod +x ${bundledir}/install.sh
 
 

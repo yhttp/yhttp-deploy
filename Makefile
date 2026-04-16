@@ -7,7 +7,7 @@ PREFIX ?= /usr/local
 TARGET ?= yhttp-deploy
 INSTALL_FILES = \
 	_version.mk \
-	install.sh \
+	target-install.sh \
 	bundle.sh \
 	deploy.sh
 
