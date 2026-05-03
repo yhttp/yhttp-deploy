@@ -120,7 +120,7 @@ echo "\
 import os
 from ${pypkg} import app
 
-app.settings.loadfile('${configdir}/${pypkg}.yml')
+app.settings.load'${configdir}/${pypkg}.yml')
 app.ready()
 " | ${usrexec} tee ${configdir}/${instance}_wsgi.py > /dev/null
 
@@ -142,10 +142,12 @@ chdir = ${configdir}
 # create database
 if sudo -u postgres psql -lqt | cut -d'|' -f1 | grep -qw ${instance} ; then
   echo "database ${instance} already created"
+  ${appcmd} db migration upgrade
 else
   ${appcmd} db create
   ${appcmd} db objects create
   ${appcmd} db basedata insert
+  ${appcmd} db migration set last
 fi
 
 
