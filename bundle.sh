@@ -5,6 +5,7 @@ shopt -s nullglob
 assets=""
 libdir="$(realpath $(dirname $(readlink -f ${BASH_SOURCE[0]})))"
 outdir=bundles
+userconfigfile="production.yml"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -48,6 +49,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --configuration-file)
+      userconfigfile="$2"
+      shift
+      shift
+      ;;
     --)
       shift
       ;;
@@ -62,7 +68,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# exceptions
+# validation
 if [ -z "${pkgname}" ]; then
   echo "--pkg-name required" >&2
   exit 1
@@ -93,9 +99,17 @@ if [ -z "${targetdomain}" ]; then
   exit 1
 fi
 
+if [ ! -f "${userconfigfile}" ]; then
+  echo "cannot find ${userconfigfile}, please provide this file or specify \
+another file with --configuration-file option." >&2
+  exit 1
+fi
+
+
 # setup vars
 bundlename=${pkgname}-bundle-${pkgver}
 bundledir=${outdir}/${bundlename}
+
 
 # create a temporary directory
 mkdir -p ${bundledir}
@@ -128,6 +142,10 @@ cp ${libdir}/target-install.sh ${bundledir}/install.sh
 chmod +x ${bundledir}/install.sh
 
 
+# user configuration file
+cp ${userconfigfile} ${bundledir}
+
+
 # vars
 echo -n "\
 pydist=$(basename ${pkgdist})
@@ -135,6 +153,7 @@ pypkg=${pkgname}
 user=${targetuser}
 instance=${targetinstance}
 domain=${targetdomain}
+userconfigfile=${userconfigfile}
 " > ${bundledir}/.vars
 
 # bundle

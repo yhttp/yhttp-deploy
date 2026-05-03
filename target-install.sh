@@ -15,7 +15,7 @@ appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
 
 
 # install dependencies
-apt install -y \
+apt-get install -y \
   nginx \
   build-essential \
   libpq-dev \
@@ -90,48 +90,29 @@ mako:
 
 auth:
   domain: ${domain}
-  blacklist:
-    key: yhttp-auth-forbidden
-
   redis:
     host: localhost
     port: 6379
-    db: 0
 
   accesstoken:
-    maxage: 86400    # seconds, one day
-    leeway: 100      # seconds
-    secret: 'EOfGMU2Y15VHqLmNTt+CGlqtUDfE+nU0'
     cookie:
-      key: yhttp-accesstoken
       secure: true
-      httponly: true
-      samesite: Strict
-      path: /
 
   refreshtoken:
     enabled: true
-    maxage: 2592000  # 1 Month
-    leeway: 10       # seconds
-    algorithm: HS256
-    secret: 'p7zcrssMswiWzWLieF+qpgCsXCCFnYfe'
     cookie:
-      key: yhttp-refreshtoken
       secure: true
-      httponly: true
-      samesite: Strict
-      path: /apiv1/tokens
 
   csrftoken:
-    size: 1024
     cookie:
-      key: yhttp-csrftoken
       secure: true
-      httponly: true
-      maxage: 60  # 1 Minute
-      samesite: Strict
-      path: /
+
+!include ${configdir}/${userconfigfile}
 " | ${usrexec} tee ${configdir}/${pypkg}.yml > /dev/null
+
+
+# copy user config file
+cp ${HERE}/${userconfigfile} ${configdir}
 
 
 # wsgi file
