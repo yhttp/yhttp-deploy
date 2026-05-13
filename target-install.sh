@@ -71,7 +71,7 @@ fi
 
 
 # yhttp config file
-echo "\
+echo -n "\
 debug: false
 env: production 
 
@@ -107,26 +107,26 @@ auth:
     cookie:
       secure: true
 
-!include ${configdir}/${userconfigfile}
+!include ${configdir}/${pypkg}-${userconfigfile}
 " | ${usrexec} tee ${configdir}/${pypkg}.yml > /dev/null
 
 
 # copy user config file
-cp ${HERE}/${userconfigfile} ${configdir}
+cp ${HERE}/${userconfigfile} ${configdir}/${pypkg}-${userconfigfile}
 
 
 # wsgi file
-echo "\
+echo -n "\
 import os
 from ${pypkg} import app
 
-app.settings.load'${configdir}/${pypkg}.yml')
+app.settings <<= '${configdir}/${pypkg}.yml'
 app.ready()
 " | ${usrexec} tee ${configdir}/${instance}_wsgi.py > /dev/null
 
 
 # uwsgi config file
-echo "\
+echo -n "\
 [uwsgi]
 socket = ${vardir}/${instance}.s
 module = ${instance}_wsgi:app
@@ -152,7 +152,7 @@ fi
 
 
 # systemd unit
-echo "\
+echo -n "\
 [Unit]
 Description=${instance} web service
 After=network.target

@@ -1,6 +1,5 @@
 YHTTP_DEPLOY_URL ?= https://github.com/yhttp/yhttp-deploy
-YHTTP_DEPLOY_VERSION = 1.0.1
-
+YHTTP_DEPLOY_VERSION = 1.0.2
 
 version_greater_equal = $(shell if printf '%s\n%s\n' '$(1)' \
 	'$(YHTTP_DEPLOY_VERSION)' | \
