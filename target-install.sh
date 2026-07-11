@@ -19,9 +19,8 @@ apt-get install -y \
   nginx \
   build-essential \
   libpq-dev \
-  python3-dev \
-  python3-venv \
-  python3-pip \
+  ${pyver}-dev \
+  ${pyver}-venv \
   postgresql \
   redis-server \
   certbot \
