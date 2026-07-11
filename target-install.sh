@@ -25,7 +25,7 @@ apt-get install -y \
   postgresql \
   redis-server \
   certbot \
-  python3-certbot-nginx
+  python3-certbot-dns-cloudflare
 
 
 # create user if not exists
@@ -176,16 +176,25 @@ systemctl status ${instance}.service
 
 
 # ssl
+cloudflare_ini = ${configdir}/cloudflare.ini
+if [ ! -f ${cloudflate_ini} ]; then
+  echo "${cloudflare_ini} file does not exists, please create it" >&2
+  exit 1
+fi
+
+
 sslcert=/etc/letsencrypt/live/${domain}/fullchain.pem
 sslkey=/etc/letsencrypt/live/${domain}/privkey.pem
 if [ ! -f ${sslcert} ]; then
-  certbot \
-    certonly \
-    --nginx \
-    -d ${domain} \
+  certbot certonly \
+    --dns-cloudflare \
+    --dns-cloudflare-credentials ${cloudflare_ini} \
+    --dns-cloudflare-propagation-seconds 60 \
     --non-interactive \
-    --agree-tos \
-    -m socialeasygo@gmail.com
+    --no-eff-email \    
+    --email ${adminemail} \
+    --agree-tos \       
+    -d ${domain}
 fi
 
 

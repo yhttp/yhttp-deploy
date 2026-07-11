@@ -54,6 +54,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --admin-email)
+      adminemail="$2"
+      shift
+      shift
+      ;;
     --)
       shift
       ;;
@@ -67,6 +72,7 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
 
 # validation
 if [ -z "${pkgname}" ]; then
@@ -102,6 +108,10 @@ fi
 if [ ! -f "${userconfigfile}" ]; then
   echo "cannot find ${userconfigfile}, please provide this file or specify \
 another file with --configuration-file option." >&2
+fi
+
+if [ -z "${adminemail}" ]; then
+  echo "--admin-email required" >&2
   exit 1
 fi
 
@@ -154,14 +164,18 @@ user=${targetuser}
 instance=${targetinstance}
 domain=${targetdomain}
 userconfigfile=${userconfigfile}
+adminemail=${adminemail}
 " > ${bundledir}/.vars
+
 
 # bundle
 outfile=${outdir}/${bundlename}.tar.gz
 tar -cv -C ${outdir} -f ${outfile} ${bundlename}
 
+
 # cleanup
 rm -r ${outdir}/${bundlename}
+
 
 # report
 echo "bundle successfully generated: ${outfile}"

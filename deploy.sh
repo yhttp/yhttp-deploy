@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 set -e
 
+
 while [[ $# -gt 0 ]]; do
   case $1 in
     --host)
@@ -36,11 +37,13 @@ if [ -z "$bundle" ]; then
   exit 1
 fi
 
+
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 bundletar=$(basename ${bundle})
 bundledir=${bundletar%.tar.gz}
 targettmp=/tmp/${timestamp}
 sshhost=root@${host}
+
 
 ssh ${sshhost} "mkdir ${targettmp}"
 scp ${bundle} ${sshhost}:${targettmp}
