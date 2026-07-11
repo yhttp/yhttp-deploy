@@ -175,7 +175,7 @@ systemctl status ${instance}.service
 
 
 # ssl
-cloudflare_ini = ${configdir}/cloudflare.ini
+cloudflare_ini=${configdir}/cloudflare.ini
 if [ ! -f ${cloudflate_ini} ]; then
   echo "${cloudflare_ini} file does not exists, please create it" >&2
   exit 1
