@@ -12,7 +12,7 @@ configdir=/home/${user}/.config
 systemd_unit=${configdir}/systemd/user/${instance}.service
 vardir=/home/${user}/.var
 appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
-
+pyver=python3.13
 
 # install dependencies
 apt-get install -y \
@@ -37,7 +37,7 @@ fi
 
 # create python venv if not exists
 if [ ! -d "${pyenv}" ]; then
-  ${usrexec} python3 -m venv ${pyenv}
+  ${usrexec} ${pyver} -m venv ${pyenv}
 fi
 
 
