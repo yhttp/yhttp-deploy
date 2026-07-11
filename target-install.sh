@@ -60,7 +60,7 @@ ${usrexec} ${pip} -vv install uwsgi
 # deploy assets
 if [ -n "$(ls -A ${HERE}/assets)" ]; then
   ${usrexec} mkdir -p ${vardir}/www/assets
-  rm -r ${vardir}/www/assets/*
+  rm -rf ${vardir}/www/assets/*
   chmod -R 755 ${vardir}/www/assets
   cp ${HERE}/assets/* ${vardir}/www/assets
 
