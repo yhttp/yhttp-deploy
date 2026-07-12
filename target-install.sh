@@ -14,6 +14,7 @@ vardir=/home/${user}/.var
 appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
 pyver=python3.13
 
+
 # install dependencies
 apt-get install -y \
   nginx \
@@ -24,7 +25,9 @@ apt-get install -y \
   postgresql \
   redis-server \
   certbot \
-  python3-certbot-dns-cloudflare
+  python3-certbot-dns-cloudflare \
+  python3-certbot-nginx \
+  openssl
 
 
 # create user if not exists
@@ -179,6 +182,18 @@ cloudflare_ini=${configdir}/cloudflare.ini
 if [ ! -f ${cloudflare_ini} ]; then
   echo "${cloudflare_ini} file does not exists, please create it" >&2
   exit 1
+fi
+
+
+ssloptions=/etc/letsencrypt/options-ssl-nginx.conf
+if [ ! -f ${ssloptions} ]; then
+cp /usr/lib/python3/dist-packages/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf /etc/letsencrypt/
+fi
+
+
+ssldhparams=/etc/letsencrypt/ssl-dhparams.pem
+if [ ! -f ${ssldhparams} ]; then
+openssl dhparam -out ${ssldhparams} 2048
 fi
 
 
