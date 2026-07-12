@@ -190,9 +190,9 @@ if [ ! -f ${sslcert} ]; then
     --dns-cloudflare-credentials ${cloudflare_ini} \
     --dns-cloudflare-propagation-seconds 60 \
     --non-interactive \
-    --no-eff-email \    
+    --no-eff-email \
     --email ${adminemail} \
-    --agree-tos \       
+    --agree-tos \
     -d ${domain}
 fi
 
