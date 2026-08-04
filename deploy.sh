@@ -14,6 +14,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --target-instance)
+      targetinstance="$2"
+      shift
+      shift
+      ;;
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -37,11 +42,16 @@ if [ -z "$bundle" ]; then
   exit 1
 fi
 
+if [ -z "${targetinstance}" ]; then
+  echo "--target-instance required" >&2
+  exit 1
+fi
+
 
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 bundletar=$(basename ${bundle})
 bundledir=${bundletar%.tar.gz}
-targettmp=/tmp/${timestamp}
+targettmp=/tmp/${targetinstance}-${timestamp}
 sshhost=root@${host}
 
 
