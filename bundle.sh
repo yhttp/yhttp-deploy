@@ -59,6 +59,16 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --pyver)
+      pyver="$2"
+      shift
+      shift
+      ;;
+    --nginx-configfile)
+      nginxconfigfile="$2"
+      shift
+      shift
+      ;;
     --)
       shift
       ;;
@@ -115,6 +125,15 @@ if [ -z "${adminemail}" ]; then
   exit 1
 fi
 
+if [ -z "${pyver}" ]; then
+  echo "--pyver required" >&2
+  exit 1
+fi
+
+if [ -z "${nginxconfigfile}" ]; then
+  nginxconfigfile=${targetdomain}
+fi
+
 
 # setup vars
 bundlename=${pkgname}-bundle-${pkgver}
@@ -165,6 +184,8 @@ instance=${targetinstance}
 domain=${targetdomain}
 userconfigfile=${userconfigfile}
 adminemail=${adminemail}
+pyver=${pyver}
+nginxconfigfile=${nginxconfigfile}
 " > ${bundledir}/.vars
 
 

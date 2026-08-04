@@ -12,7 +12,6 @@ configdir=/home/${user}/.config
 systemd_unit=${configdir}/systemd/user/${instance}.service
 vardir=/home/${user}/.var
 appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
-pyver=python3.13
 
 
 # install dependencies
@@ -178,28 +177,25 @@ systemctl status ${instance}.service
 
 
 # ssl
-cloudflare_ini=${configdir}/cloudflare.ini
-if [ ! -f ${cloudflare_ini} ]; then
-  echo "${cloudflare_ini} file does not exists, please create it" >&2
-  exit 1
-fi
-
-
-ssloptions=/etc/letsencrypt/options-ssl-nginx.conf
-if [ ! -f ${ssloptions} ]; then
-cp /usr/lib/python3/dist-packages/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf /etc/letsencrypt/
-fi
-
-
-ssldhparams=/etc/letsencrypt/ssl-dhparams.pem
-if [ ! -f ${ssldhparams} ]; then
-openssl dhparam -out ${ssldhparams} 2048
-fi
-
-
 sslcert=/etc/letsencrypt/live/${domain}/fullchain.pem
 sslkey=/etc/letsencrypt/live/${domain}/privkey.pem
 if [ ! -f ${sslcert} ]; then
+  cloudflare_ini=${configdir}/cloudflare.ini
+  if [ ! -f ${cloudflare_ini} ]; then
+    echo "${cloudflare_ini} file does not exists, please create it" >&2
+    exit 1
+  fi
+  
+  ssloptions=/etc/letsencrypt/options-ssl-nginx.conf
+  if [ ! -f ${ssloptions} ]; then
+  cp /usr/lib/python3/dist-packages/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf /etc/letsencrypt/
+  fi
+  
+  ssldhparams=/etc/letsencrypt/ssl-dhparams.pem
+  if [ ! -f ${ssldhparams} ]; then
+  openssl dhparam -out ${ssldhparams} 2048
+  fi
+
   certbot certonly \
     --dns-cloudflare \
     --dns-cloudflare-credentials ${cloudflare_ini} \
@@ -222,7 +218,7 @@ server {
 
 server {
   listen 443 ssl http2;
-  listen [::]:443 ssl http2 ipv6only=on;
+  listen [::]:443 ssl http2;
   server_name ${domain};
 
   ssl_certificate ${sslcert};
@@ -243,8 +239,8 @@ server {
     uwsgi_pass unix:${vardir}/${instance}.s;
   }
 }
-" > /etc/nginx/sites-available/${domain}
-if [ ! -f "/etc/nginx/sites-enabled/${domain}" ]; then
-  ln -s /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled
+" > /etc/nginx/sites-available/${nginxconfigfile}
+if [ ! -f "/etc/nginx/sites-enabled/${nginxconfigfile}" ]; then
+  ln -s /etc/nginx/sites-available/${nginxconfigfile} /etc/nginx/sites-enabled
 fi
 systemctl reload nginx
