@@ -82,6 +82,7 @@ assets:
 
 media:
   serve: false
+  directory: ${vardir}/www/media
 
 db:
   url: postgresql://:@/${instance}
