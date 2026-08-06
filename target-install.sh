@@ -63,13 +63,13 @@ if [ -n "$(ls -A ${HERE}/assets)" ]; then
   ${usrexec} mkdir -p ${vardir}/www/assets
   rm -rf ${vardir}/www/assets/*
   chmod -R 755 ${vardir}/www/assets
-  ${usrexec} cp ${HERE}/assets/* ${vardir}/www/assets
+  cp ${HERE}/assets/* ${vardir}/www/assets
 
   if [ -f ${HERE}/assets-manifest.json ]; then
-    ${usrexec} cp ${HERE}/assets-manifest.json \
-      ${configdir}/assets-manifest.json
+    cp ${HERE}/assets-manifest.json ${configdir}/assets-manifest.json
   fi
 fi
+chown -R ${user}:${nginxgroup} ${vardir}/www/assets
 
 
 # deploy public files
@@ -77,8 +77,9 @@ ${usrexec} mkdir -p ${vardir}/www/public
 rm -rf ${vardir}/www/public/*
 chmod -R 755 ${vardir}/www/public
 if [ -d ${HERE}/public ] && [ -n "$(ls -A ${HERE}/public)" ]; then
-  ${usrexec} cp -r ${HERE}/public/* ${vardir}/www/public
+  cp -r ${HERE}/public/* ${vardir}/www/public
 fi
+chown -R ${user}:${nginxgroup} ${vardir}/www/public
 
 
 # yhttp config file
@@ -174,7 +175,7 @@ After=network.target
 
 [Service]
 User=${user}
-Group=www-data
+Group=${nginxgroup}
 ExecStart=${pyenv}/bin/uwsgi \
   --ini ${configdir}/${instance}_uwsgi.ini \
   --wsgi-file ${instance}_wsgi.py
@@ -250,7 +251,7 @@ server {
 
   root ${vardir}/www/public;
   location / {
-    try_files $uri $uri/ @upstream;
+    try_files \$uri @upstream;
   }
 
   location @upstream {

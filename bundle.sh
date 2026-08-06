@@ -7,6 +7,7 @@ libdir="$(realpath $(dirname $(readlink -f ${BASH_SOURCE[0]})))"
 outdir=bundles
 userconfigfile="production.yml"
 publicdir=public
+nginxgroup=www-data
 
 
 while [[ $# -gt 0 ]]; do
@@ -68,6 +69,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     --nginx-configfile)
       nginxconfigfile="$2"
+      shift
+      shift
+      ;;
+    --nginx-group)
+      nginxgroup="$2"
       shift
       shift
       ;;
@@ -200,6 +206,7 @@ userconfigfile=${userconfigfile}
 adminemail=${adminemail}
 pyver=${pyver}
 nginxconfigfile=${nginxconfigfile}
+nginxgroup=${nginxgroup}
 " > ${bundledir}/.vars
 
 
