@@ -63,11 +63,21 @@ if [ -n "$(ls -A ${HERE}/assets)" ]; then
   ${usrexec} mkdir -p ${vardir}/www/assets
   rm -rf ${vardir}/www/assets/*
   chmod -R 755 ${vardir}/www/assets
-  cp ${HERE}/assets/* ${vardir}/www/assets
+  ${usrexec} cp ${HERE}/assets/* ${vardir}/www/assets
 
   if [ -f ${HERE}/assets-manifest.json ]; then
-    cp ${HERE}/assets-manifest.json ${configdir}/assets-manifest.json
+    ${usrexec} cp ${HERE}/assets-manifest.json \
+      ${configdir}/assets-manifest.json
   fi
+fi
+
+
+# deploy public files
+${usrexec} mkdir -p ${vardir}/www/public
+rm -rf ${vardir}/www/public/*
+chmod -R 755 ${vardir}/www/public
+if [ -d ${HERE}/public ] && [ -n "$(ls -A ${HERE}/public)" ]; then
+  ${usrexec} cp -r ${HERE}/public/* ${vardir}/www/public
 fi
 
 
@@ -83,6 +93,9 @@ assets:
 media:
   serve: false
   directory: ${vardir}/www/media
+
+public:
+  serve: false
 
 db:
   url: postgresql://:@/${instance}
@@ -234,8 +247,13 @@ server {
   location /media {
     alias ${vardir}/www/media;
   }
-  
+
+  root ${vardir}/www/public;
   location / {
+    try_files $uri $uri/ @upstream;
+  }
+
+  location @upstream {
     include uwsgi_params;
     uwsgi_pass unix:${vardir}/${instance}.s;
   }

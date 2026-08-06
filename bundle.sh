@@ -6,6 +6,8 @@ assets=""
 libdir="$(realpath $(dirname $(readlink -f ${BASH_SOURCE[0]})))"
 outdir=bundles
 userconfigfile="production.yml"
+publicdir=public
+
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -66,6 +68,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     --nginx-configfile)
       nginxconfigfile="$2"
+      shift
+      shift
+      ;;
+    --public-directory)
+      publicdir="$2"
       shift
       shift
       ;;
@@ -163,6 +170,13 @@ fi
 
 if [ -n "${assetsmanifest}" ]; then
   cp ${assetsmanifest} ${bundledir}/assets-manifest.json
+fi
+
+
+# public files
+if [ -d "${publicdir}" ]; then
+  mkdir -p ${bundledir}/public
+  cp -r ${publicdir}/* ${bundledir}/public
 fi
 
 
