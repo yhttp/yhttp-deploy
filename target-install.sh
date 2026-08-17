@@ -228,14 +228,14 @@ echo -n "\
 server {
   listen 80;
   listen [::]:80;
-  server_name ${domain} www.${domain};
+  server_name ${domain} ${aliasdomains};
   return 301 https://\$host\$request_uri;
 }
 
 server {
   listen 443 ssl http2;
   listen [::]:443 ssl http2;
-  server_name ${domain} www.${domain};
+  server_name ${domain} ${aliasdomains};
 
   ssl_certificate ${sslcert};
   ssl_certificate_key ${sslkey};

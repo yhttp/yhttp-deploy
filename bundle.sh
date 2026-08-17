@@ -47,6 +47,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --target-aliasdomains)
+      targetaliasdomains="$2"
+      shift
+      shift
+      ;;
     --assets-manifest)
       assetsmanifest="$2"
       shift
@@ -202,6 +207,7 @@ pypkg=${pkgname}
 user=${targetuser}
 instance=${targetinstance}
 domain=${targetdomain}
+aliasdomains=${targetaliasdomains}
 userconfigfile=${userconfigfile}
 adminemail=${adminemail}
 pyver=${pyver}
