@@ -193,7 +193,9 @@ fi
 
 # install.sh
 cp ${libdir}/target-install.sh ${bundledir}/install.sh
+cp ${libdir}/target-uninstall.sh ${bundledir}/uninstall.sh
 chmod +x ${bundledir}/install.sh
+chmod +x ${bundledir}/uninstall.sh
 
 
 # user configuration file

@@ -29,6 +29,11 @@ apt-get install -y \
   openssl
 
 
+# copy the uninstall script
+install -D -m 700 ${HERE}/uninstall.sh /usr/local/bin/${instance}-uninstall.sh
+install -D -m 600 ${HERE}/.vars /etc/yhttp-deploy/${instance}.vars
+
+
 # create user if not exists
 if [ ! -d "/home/${user}" ]; then
   adduser --disabled-password --gecos '' ${user} 
@@ -225,6 +230,7 @@ fi
 
 
 echo -n "\
+# Managed by yhttp-deploy: instance=${instance}
 server {
   listen 80;
   listen [::]:80;

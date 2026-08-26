@@ -8,6 +8,7 @@ TARGET ?= yhttp-deploy
 INSTALL_FILES = \
 	_version.mk \
 	target-install.sh \
+	target-uninstall.sh \
 	bundle.sh \
 	deploy.sh
 
