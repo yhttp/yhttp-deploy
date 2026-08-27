@@ -133,6 +133,7 @@ if systemctl is-enabled "${instance}.service" >/dev/null 2>&1; then
   fi
 fi
 if systemctl is-active "${instance}.service" >/dev/null 2>&1; then
+  note "stopping ${instance}.service"
   systemctl stop "${instance}.service" || warn "could not stop ${instance}.service"
 fi
 remove_file "${systemd_unit}"
