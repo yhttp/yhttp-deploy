@@ -57,6 +57,7 @@ systemd_unit="${configdir}/systemd/user/${instance}.service"
 nginx_available="/etc/nginx/sites-available/${nginxconfigfile}"
 nginx_enabled="/etc/nginx/sites-enabled/${nginxconfigfile}"
 uninstall_command="/usr/local/bin/${instance}-uninstall.sh"
+confirm_all=false
 
 note() {
   echo "[uninstall] $*"
@@ -102,8 +103,24 @@ confirm_remove() {
     return 1
   fi
 
-  read -r -p "Remove ${kind} ${path}? [y/N] " answer
-  [[ "${answer}" =~ ^[Yy]([Ee][Ss])?$ ]]
+  if ${confirm_all}; then
+    return 0
+  fi
+
+  read -r -p "Remove ${kind} ${path}? [y/N/a] " answer
+  case "${answer}" in
+    [Yy]|[Yy][Ee][Ss])
+      return 0
+      ;;
+    [Aa]|[Aa][Ll][Ll])
+      confirm_all=true
+      note "all remaining removals confirmed"
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
 # Stop first so the socket is no longer recreated while deployment files are
