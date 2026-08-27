@@ -197,8 +197,8 @@ systemctl status ${instance}.service
 
 
 # ssl
-sslcert=/etc/letsencrypt/live/${domain}/fullchain.pem
-sslkey=/etc/letsencrypt/live/${domain}/privkey.pem
+sslcert=/etc/letsencrypt/live/${ssldomain}/fullchain.pem
+sslkey=/etc/letsencrypt/live/${ssldomain}/privkey.pem
 if [ ! -f ${sslcert} ]; then
   cloudflare_ini=${configdir}/cloudflare.ini
   if [ ! -f ${cloudflare_ini} ]; then

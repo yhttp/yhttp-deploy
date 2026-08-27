@@ -47,6 +47,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --target-ssldomain)
+      targetssldomain="$2"
+      shift
+      shift
+      ;;
     --target-aliasdomains)
       targetaliasdomains="$2"
       shift
@@ -133,6 +138,11 @@ if [ -z "${targetdomain}" ]; then
   exit 1
 fi
 
+if [ -z "${targetssldomain}" ]; then
+  targetssldomain=${targetdomain}
+  exit 1
+fi
+
 if [ ! -f "${userconfigfile}" ]; then
   echo "cannot find ${userconfigfile}, please provide this file or specify \
 another file with --configuration-file option." >&2
@@ -209,6 +219,7 @@ pypkg=${pkgname}
 user=${targetuser}
 instance=${targetinstance}
 domain=${targetdomain}
+ssldomain=${targetssldomain}
 aliasdomains=${targetaliasdomains}
 userconfigfile=${userconfigfile}
 adminemail=${adminemail}
