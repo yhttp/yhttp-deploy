@@ -17,6 +17,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --namespace)
+      namespace="$2"
+      shift
+      shift
+      ;;
     --pkg-dist)
       pkgdist="$2"
       shift
@@ -113,6 +118,10 @@ if [ -z "${pkgname}" ]; then
   exit 1
 fi
 
+if [ -z "${namespace}" ]; then
+  namespace=${pkgname}
+fi
+
 if [ -z "${pkgver}" ]; then
   echo "--pkg-version required" >&2
   exit 1
@@ -140,7 +149,6 @@ fi
 
 if [ -z "${targetssldomain}" ]; then
   targetssldomain=${targetdomain}
-  exit 1
 fi
 
 if [ ! -f "${userconfigfile}" ]; then
@@ -216,6 +224,7 @@ cp ${userconfigfile} ${bundledir}
 echo -n "\
 pydist=$(basename ${pkgdist})
 pypkg=${pkgname}
+pynamespace=${namespace}
 user=${targetuser}
 instance=${targetinstance}
 domain=${targetdomain}

@@ -139,7 +139,7 @@ cp ${HERE}/${userconfigfile} ${configdir}/${pypkg}-${userconfigfile}
 # wsgi file
 echo -n "\
 import os
-from ${pypkg} import app
+from ${pynamespace} import app
 
 app.settings <<= '${configdir}/${pypkg}.yml'
 app.ready()
