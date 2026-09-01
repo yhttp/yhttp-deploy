@@ -91,7 +91,7 @@ chown -R ${user}:${nginxgroup} ${vardir}/www/public
 echo -n "\
 debug: false
 env: production 
-publicurl: https://${targetdomain}
+publicurl: https://${domain}
 
 assets:
   serve: false
