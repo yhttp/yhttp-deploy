@@ -259,8 +259,8 @@ if [ ! -f ${sslcert} ]; then
     --no-eff-email \
     --email ${adminemail} \
     --agree-tos \
-    -d ${domain}
-    -d *.${domain}
+    -d ${ssldomain} \
+    -d *.${ssldomain}
 fi
 
 
