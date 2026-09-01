@@ -91,6 +91,7 @@ chown -R ${user}:${nginxgroup} ${vardir}/www/public
 echo -n "\
 debug: false
 env: production 
+publicurl: https://${targetdomain}
 
 assets:
   serve: false
@@ -111,22 +112,56 @@ mako:
 
 auth:
   domain: ${domain}
+  
+  redis:
+    host: localhost
+    port: 6379
+
+  blacklist:
+    key: yhttp-auth-forbidden
+
   redis:
     host: localhost
     port: 6379
 
   accesstoken:
+    algorithm: HS256
     cookie:
+      key: yhttp-accesstoken
       secure: true
+      httponly: true
+      samesite: Lax
+      path: /
 
   refreshtoken:
     enabled: true
+    algorithm: HS256
     cookie:
+    cookie:
+      key: yhttp-refreshtoken
       secure: true
+      httponly: true
+      samesite: Strict
+      path: /apiv1/tokens
 
   csrftoken:
+    size: 1024
     cookie:
+      key: yhttp-csrftoken
       secure: true
+      httponly: true
+      maxage: 240  # 4 Minute
+      samesite: Lax
+      path: /apiv1
+
+  oauth2:
+    statetoken:
+      algorithm: HS256
+
+    google:
+      authurl: https://accounts.google.com/o/oauth2/v2/auth
+      tokenurl: https://oauth2.googleapis.com/token
+
 
 !include ${configdir}/${pypkg}-${userconfigfile}
 " | ${usrexec} tee ${configdir}/${pypkg}.yml > /dev/null

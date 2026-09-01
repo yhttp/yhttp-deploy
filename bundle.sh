@@ -172,7 +172,7 @@ fi
 
 
 # setup vars
-bundlename=${pkgname}-bundle-${pkgver}
+bundlename=${pkgname}-bundle-${pkgver}-${targetdomain}
 bundledir=${outdir}/${bundlename}
 
 
