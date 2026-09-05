@@ -11,6 +11,10 @@ userconfigfile="production.yml"
 publicdir=public
 nginxgroup=www-data
 
+log() {
+  printf '[bundle] %s\n' "$1"
+}
+
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -187,50 +191,62 @@ bundledir=${outdir}/${bundlename}
 
 
 # create a temporary directory
+log "Creating bundle directory: ${bundledir}"
 mkdir -p ${bundledir}
 
 
 # cleanup the pre-existing files
 if [ -d ${bundledir} ]; then
+  log "Cleaning existing bundle contents: ${bundledir}"
   rm -fr ${bundledir}/*
   rm -fr ${bundledir}/.*
 fi
 
 
 # copy python distribution 
+log "Copying Python distribution to ${bundledir}"
 cp ${pkgdist} ${bundledir}
 
 
 # assets
 if [ -n "${assets}" ]; then
+  log "Creating assets directory: ${bundledir}/assets"
   mkdir -p ${bundledir}/assets
+  log "Copying assets to ${bundledir}/assets"
   cp ${assets} ${bundledir}/assets
 fi
 
 if [ -n "${assetsmanifest}" ]; then
+  log "Copying assets manifest to ${bundledir}/assets-manifest.json"
   cp ${assetsmanifest} ${bundledir}/assets-manifest.json
 fi
 
 
 # public files
 if [ -d "${publicdir}" ] && [ -n "$(ls -A ${publicdir})" ]; then
+  log "Creating public directory: ${bundledir}/public"
   mkdir -p ${bundledir}/public
+  log "Copying public files to ${bundledir}/public"
   cp -r ${publicdir}/* ${bundledir}/public
 fi
 
 
 # install.sh
+log "Copying installation scripts to ${bundledir}"
 cp ${libdir}/target-install.sh ${bundledir}/install.sh
 cp ${libdir}/target-uninstall.sh ${bundledir}/uninstall.sh
+log "Making installation scripts executable"
 chmod +x ${bundledir}/install.sh
 chmod +x ${bundledir}/uninstall.sh
 
 
 # user configuration file
+log "Copying user configuration to ${bundledir}"
 cp ${userconfigfile} ${bundledir}
 
 
 # vars
+log "Writing bundle configuration: ${bundledir}/.vars"
 echo -n "\
 pydist=$(basename ${pkgdist})
 pypkg=${pkgname}
@@ -250,10 +266,12 @@ nginxgroup=${nginxgroup}
 
 # bundle
 outfile=${outdir}/${bundlename}.tar.gz
+log "Creating bundle archive: ${outfile}"
 tar -cv -C ${outdir} -f ${outfile} ${bundlename}
 
 
 # cleanup
+log "Removing temporary bundle directory: ${bundledir}"
 rm -r ${outdir}/${bundlename}
 
 

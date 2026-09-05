@@ -13,8 +13,13 @@ systemd_unit=${configdir}/systemd/user/${instance}.service
 vardir=/home/${user}/.var
 appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
 
+note() {
+  printf '[install] %s\n' "$1"
+}
+
 
 # install dependencies
+note "Installing system dependencies"
 apt-get install -y \
   nginx \
   build-essential \
@@ -30,64 +35,83 @@ apt-get install -y \
 
 
 # copy the uninstall script
+note "Installing uninstall script and deployment state"
 install -D -m 700 ${HERE}/uninstall.sh /usr/local/bin/${instance}-uninstall.sh
 install -D -m 600 ${HERE}/.vars /etc/yhttp-deploy/${instance}.vars
 
 
 # create user if not exists
 if [ ! -d "/home/${user}" ]; then
+  note "Creating system user: ${user}"
   adduser --disabled-password --gecos '' ${user} 
+  note "Creating PostgreSQL user: ${user}"
   echo "CREATE USER ${user} WITH CREATEDB" | sudo -u postgres psql
 fi
 
 
 # create python venv if not exists
 if [ ! -d "${pyenv}" ]; then
+  note "Creating Python virtual environment: ${pyenv}"
   ${usrexec} ${pyver} -m venv ${pyenv}
 fi
 
 
 # create directories
+note "Creating application directories"
 ${usrexec} mkdir -p ${configdir}/systemd/user
 ${usrexec} mkdir -p ${vardir}/www/media
 
 
 # fix permissions
+note "Setting application directory permissions"
 chmod -R 755 ${vardir}/www
 chmod 755 ${vardir}
 chmod 755 /home/${user}
 
 
 # install the python package(s)
+note "Installing Python packages"
 ${usrexec} ${pip} -vv install ${HERE}/${pydist}
 ${usrexec} ${pip} -vv install uwsgi
 
 
 # deploy assets
 if [ -n "$(ls -A ${HERE}/assets)" ]; then
+  note "Creating assets directory"
   ${usrexec} mkdir -p ${vardir}/www/assets
+  note "Removing previous assets"
   rm -rf ${vardir}/www/assets/*
+  note "Setting assets permissions"
   chmod -R 755 ${vardir}/www/assets
+  note "Copying assets"
   cp ${HERE}/assets/* ${vardir}/www/assets
 
   if [ -f ${HERE}/assets-manifest.json ]; then
+    note "Copying assets manifest"
     cp ${HERE}/assets-manifest.json ${configdir}/assets-manifest.json
   fi
 fi
+note "Assigning assets ownership"
 chown -R ${user}:${nginxgroup} ${vardir}/www/assets
 
 
 # deploy public files
+note "Creating public directory"
 ${usrexec} mkdir -p ${vardir}/www/public
+note "Removing previous public files"
 rm -rf ${vardir}/www/public/*
+note "Setting public file permissions"
 chmod -R 755 ${vardir}/www/public
 if [ -d ${HERE}/public ] && [ -n "$(ls -A ${HERE}/public)" ]; then
+  note "Copying public files"
   cp -r ${HERE}/public/* ${vardir}/www/public
 fi
+note "Assigning public files ownership"
 chown -R ${user}:${nginxgroup} ${vardir}/www/public
 
 
 # yhttp config file
+note "Writing YHTTP configuration"
 echo -n "\
 debug: false
 env: production 
@@ -168,10 +192,12 @@ auth:
 
 
 # copy user config file
+note "Copying user configuration"
 cp ${HERE}/${userconfigfile} ${configdir}/${pypkg}-${userconfigfile}
 
 
 # wsgi file
+note "Writing WSGI configuration"
 echo -n "\
 import os
 from ${pynamespace} import app
@@ -182,6 +208,7 @@ app.ready()
 
 
 # uwsgi config file
+note "Writing uWSGI configuration"
 echo -n "\
 [uwsgi]
 socket = ${vardir}/${instance}.s
@@ -198,16 +225,22 @@ chdir = ${configdir}
 # create database
 if sudo -u postgres psql -lqt | cut -d'|' -f1 | grep -qw ${instance} ; then
   echo "database ${instance} already created"
+  note "Upgrading existing database: ${instance}"
   ${appcmd} db migration upgrade
 else
+  note "Creating database: ${instance}"
   ${appcmd} db create
+  note "Creating database objects: ${instance}"
   ${appcmd} db objects create
+  note "Inserting database base data: ${instance}"
   ${appcmd} db basedata insert
+  note "Setting database migration version: ${instance}"
   ${appcmd} db migration set last
 fi
 
 
 # systemd unit
+note "Writing systemd service unit"
 echo -n "\
 [Unit]
 Description=${instance} web service
@@ -225,8 +258,11 @@ WantedBy=multi-user.target
 " | ${usrexec} tee ${systemd_unit} > /dev/null
 
 
+note "Reloading systemd"
 systemctl daemon-reload
+note "Enabling service: ${instance}.service"
 systemctl enable ${systemd_unit}
+note "Restarting service: ${instance}.service"
 systemctl restart ${instance}.service
 systemctl status ${instance}.service
 
@@ -243,14 +279,17 @@ if [ ! -f ${sslcert} ]; then
   
   ssloptions=/etc/letsencrypt/options-ssl-nginx.conf
   if [ ! -f ${ssloptions} ]; then
+  note "Installing certbot SSL options"
   cp /usr/lib/python3/dist-packages/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf /etc/letsencrypt/
   fi
   
   ssldhparams=/etc/letsencrypt/ssl-dhparams.pem
   if [ ! -f ${ssldhparams} ]; then
+  note "Generating SSL Diffie-Hellman parameters"
   openssl dhparam -out ${ssldhparams} 2048
   fi
 
+  note "Requesting SSL certificate for ${ssldomain}"
   certbot certonly \
     --dns-cloudflare \
     --dns-cloudflare-credentials ${cloudflare_ini} \
@@ -264,6 +303,7 @@ if [ ! -f ${sslcert} ]; then
 fi
 
 
+note "Writing nginx configuration"
 echo -n "\
 # Managed by yhttp-deploy: instance=${instance}
 server {
@@ -303,6 +343,8 @@ server {
 }
 " > /etc/nginx/sites-available/${nginxconfigfile}
 if [ ! -f "/etc/nginx/sites-enabled/${nginxconfigfile}" ]; then
+  note "Enabling nginx site: ${nginxconfigfile}"
   ln -s /etc/nginx/sites-available/${nginxconfigfile} /etc/nginx/sites-enabled
 fi
+note "Reloading nginx"
 systemctl reload nginx
