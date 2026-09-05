@@ -4,7 +4,7 @@ PS4='+ ${BASH_SOURCE}:${LINENO}: '
 shopt -s nullglob
 
 assets=""
-workers=""
+workers=()
 xtrace=false
 libdir="$(realpath $(dirname $(readlink -f ${BASH_SOURCE[0]})))"
 outdir=bundles
@@ -109,7 +109,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --worker)
-      workers="${workers} $2"
+      workers+=("$2")
       shift
       shift
       ;;
@@ -121,7 +121,7 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      assets="${assets} $1"
+      assets="${assets} \'$1\'"
       shift 
       ;;
   esac
@@ -131,6 +131,13 @@ if ${xtrace}; then
   set -x
 fi
 
+# FIXME: delete me
+# ttt=THUD
+# for w in "${workers[@]}"; do
+#   eval "g=\"$w\""
+#   echo $g
+# done
+# exit
 
 # validation
 if [ -z "${pkgname}" ]; then

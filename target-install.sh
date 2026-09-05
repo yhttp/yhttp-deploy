@@ -9,7 +9,8 @@ usrexec="sudo -u ${user}"
 pyenv=/home/${user}/.pyenv
 pip=${pyenv}/bin/pip
 configdir=/home/${user}/.config
-systemd_unit=${configdir}/systemd/user/${instance}.service
+systemd_dir=${configdir}/systemd/user/
+systemd_unit=${systemd_dir}/${instance}.service
 vardir=/home/${user}/.var
 appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
 
