@@ -59,7 +59,7 @@ nginx_enabled="/etc/nginx/sites-enabled/${nginxconfigfile}"
 uninstall_command="/usr/local/bin/${instance}-uninstall.sh"
 confirm_all=false
 
-note() {
+log() {
   echo "[uninstall] $*"
 }
 
@@ -70,12 +70,12 @@ warn() {
 remove_file() {
   if [ -e "$1" ] || [ -L "$1" ]; then
     if confirm_remove "file" "$1"; then
-      note "Removing file: $1"
+      log "Removing file: $1"
       rm -f -- "$1"
-      note "removed $1"
+      log "removed $1"
       return 0
     fi
-    note "retained $1"
+    log "retained $1"
     return 1
   fi
   return 1
@@ -84,12 +84,12 @@ remove_file() {
 remove_tree() {
   if [ -d "$1" ]; then
     if confirm_remove "directory and its contents" "$1"; then
-      note "Removing directory and its contents: $1"
+      log "Removing directory and its contents: $1"
       rm -rf -- "$1"
-      note "removed $1"
+      log "removed $1"
       return 0
     fi
-    note "retained $1"
+    log "retained $1"
     return 1
   fi
   return 1
@@ -116,7 +116,7 @@ confirm_remove() {
       ;;
     [Aa]|[Aa][Ll][Ll])
       confirm_all=true
-      note "all remaining removals confirmed"
+      log "all remaining removals confirmed"
       return 0
       ;;
     *)
@@ -129,18 +129,18 @@ confirm_remove() {
 # removed.  A failed or absent unit is normal during recovery.
 if systemctl is-enabled "${instance}.service" >/dev/null 2>&1; then
   if confirm_remove "systemd enablement links for service" "${instance}.service"; then
-    note "Disabling service: ${instance}.service"
+    log "Disabling service: ${instance}.service"
     systemctl disable "${instance}.service" || warn "could not disable ${instance}.service"
   else
-    note "retained enablement for ${instance}.service"
+    log "retained enablement for ${instance}.service"
   fi
 fi
 if systemctl is-active "${instance}.service" >/dev/null 2>&1; then
-  note "stopping ${instance}.service"
+  log "stopping ${instance}.service"
   systemctl stop "${instance}.service" || warn "could not stop ${instance}.service"
 fi
 remove_file "${systemd_unit}"
-note "Reloading systemd"
+log "Reloading systemd"
 systemctl daemon-reload || warn "could not reload systemd"
 
 # Only delete nginx configuration if this installer demonstrably owns it.  New
@@ -156,7 +156,7 @@ if [ -f "${nginx_available}" ]; then
 fi
 
 if ${nginx_owned}; then
-  note "Creating nginx configuration backup"
+  log "Creating nginx configuration backup"
   nginx_backup="$(mktemp "/tmp/${instance}-nginx.XXXXXX")"
   cp -p -- "${nginx_available}" "${nginx_backup}"
   enabled_target=""
@@ -171,14 +171,14 @@ if ${nginx_owned}; then
     nginx_changed=true
   fi
   if ${nginx_changed} && nginx -t >/dev/null 2>&1; then
-    note "Reloading nginx"
+    log "Reloading nginx"
     systemctl reload nginx || warn "could not reload nginx"
   elif ${nginx_changed}; then
     warn "nginx configuration test failed; restoring ${nginx_available}"
-    note "Restoring nginx configuration"
+    log "Restoring nginx configuration"
     cp -p -- "${nginx_backup}" "${nginx_available}"
     if [ -n "${enabled_target}" ]; then
-      note "Restoring nginx site link"
+      log "Restoring nginx site link"
       ln -s -- "${enabled_target}" "${nginx_enabled}"
     fi
   fi
@@ -225,4 +225,4 @@ fi
 
 remove_file "${uninstall_command}"
 remove_file "/etc/yhttp-deploy/${instance}.vars"
-note "uninstall complete; database and ${vardir}/www/media were retained"
+log "uninstall complete; database and ${vardir}/www/media were retained"

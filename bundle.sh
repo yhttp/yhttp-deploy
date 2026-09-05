@@ -4,6 +4,7 @@ PS4='+ ${BASH_SOURCE}:${LINENO}: '
 shopt -s nullglob
 
 assets=""
+workers=""
 xtrace=false
 libdir="$(realpath $(dirname $(readlink -f ${BASH_SOURCE[0]})))"
 outdir=bundles
@@ -104,6 +105,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     --public-directory)
       publicdir="$2"
+      shift
+      shift
+      ;;
+    --worker)
+      workers="${workers} $2"
       shift
       shift
       ;;
@@ -261,6 +267,7 @@ adminemail=${adminemail}
 pyver=${pyver}
 nginxconfigfile=${nginxconfigfile}
 nginxgroup=${nginxgroup}
+workers=${workers}
 " > ${bundledir}/.vars
 
 
