@@ -1,8 +1,10 @@
 #! /usr/bin/env bash
 set -e
+PS4='+ ${BASH_SOURCE}:${LINENO}: '
 shopt -s nullglob
 
 assets=""
+xtrace=false
 libdir="$(realpath $(dirname $(readlink -f ${BASH_SOURCE[0]})))"
 outdir=bundles
 userconfigfile="production.yml"
@@ -12,6 +14,10 @@ nginxgroup=www-data
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    -v)
+      xtrace=true
+      shift
+      ;;
     --pkg-name)
       pkgname="$2"
       shift
@@ -111,6 +117,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if ${xtrace}; then
+  set -x
+fi
+
 
 # validation
 if [ -z "${pkgname}" ]; then
@@ -203,7 +213,7 @@ fi
 
 
 # public files
-if [ -d "${publicdir}" ]; then
+if [ -d "${publicdir}" ] && [ -n "$(ls -A ${publicdir})" ]; then
   mkdir -p ${bundledir}/public
   cp -r ${publicdir}/* ${bundledir}/public
 fi
