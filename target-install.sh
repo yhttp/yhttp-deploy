@@ -259,8 +259,37 @@ WantedBy=multi-user.target
 " | ${usrexec} tee ${systemd_unit} > /dev/null
 
 
+for worker in "${workers[@]}"; do
+  eval "unitcmd=\"${worker}\""
+  IFS='=' read -r unit cmd <<< "$unitcmd"
+  log "Writing systemd service unit for worker: ${unit}.service"
+  echo -n "\
+[Unit]
+Description=${instance} worker
+Requires=${systemd_unit}
+After=${systemd_unit}
+BindsTo=${systemd_unit}
+
+[Service]
+User=${user}
+Group=${nginxgroup}
+ExecStart=${cmd}
+
+[Install]
+WantedBy=multi-user.target
+" | ${usrexec} tee ${systemd_dir}/${unit}.service > /dev/null
+done
+
+
 log "Reloading systemd"
 systemctl daemon-reload
+for worker in "${workers[@]}"; do
+  eval "unitcmd=\"${worker}\""
+  IFS='=' read -r unit cmd <<< "$unitcmd"
+  log "Enabling service: ${unit}.service"
+  systemctl enable ${unit}
+done
+
 log "Enabling service: ${instance}.service"
 systemctl enable ${systemd_unit}
 log "Restarting service: ${instance}.service"

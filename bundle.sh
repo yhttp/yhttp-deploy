@@ -131,13 +131,6 @@ if ${xtrace}; then
   set -x
 fi
 
-# FIXME: delete me
-# ttt=THUD
-# for w in "${workers[@]}"; do
-#   eval "g=\"$w\""
-#   echo $g
-# done
-# exit
 
 # validation
 if [ -z "${pkgname}" ]; then
@@ -274,8 +267,8 @@ adminemail=${adminemail}
 pyver=${pyver}
 nginxconfigfile=${nginxconfigfile}
 nginxgroup=${nginxgroup}
-workers=${workers}
 " > ${bundledir}/.vars
+declare -p workers >> ${bundledir}/.vars
 
 
 # bundle
