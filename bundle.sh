@@ -121,7 +121,7 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      assets="${assets} \'$1\'"
+      assets="${assets} $1"
       shift 
       ;;
   esac
@@ -131,6 +131,17 @@ if ${xtrace}; then
   set -x
 fi
 
+# # TODO: delete me
+# appcmd="foo"
+# instance="reelio"
+# for worker in "${workers[@]}"; do
+#   eval "unitcmd=\"${worker}\""
+#   IFS='=' read -r worker_name worker_cmd <<< "$unitcmd"
+#   worker_service="${instance}-${worker_name}.service"
+#   echo ${worker_service}
+# done
+# declare -p workers >> deleteme
+# exit
 
 # validation
 if [ -z "${pkgname}" ]; then

@@ -9,10 +9,11 @@ usrexec="sudo -u ${user}"
 pyenv=/home/${user}/.pyenv
 pip=${pyenv}/bin/pip
 configdir=/home/${user}/.config
-systemd_dir=${configdir}/systemd/user/
+systemd_dir=${configdir}/systemd/user
 systemd_unit=${systemd_dir}/${instance}.service
 vardir=/home/${user}/.var
 appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
+APPCLI="${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
 
 log() {
   printf '[install] %s\n' "$1"
@@ -263,13 +264,13 @@ for worker in "${workers[@]}"; do
   eval "unitcmd=\"${worker}\""
   IFS='=' read -r worker_name worker_cmd <<< "$unitcmd"
   worker_service="${instance}-${worker_name}.service"
-  log "Writing systemd service unit for worker: ${worker_service}.service"
+  log "Writing systemd service unit for worker: ${worker_service}"
   echo -n "\
 [Unit]
 Description=${instance} worker
-Requires=${systemd_unit}
-After=${systemd_unit}
-BindsTo=${systemd_unit}
+Requires=${instance}.service
+After=${instance}.service
+BindsTo=${instance}.service
 
 [Service]
 User=${user}
@@ -278,22 +279,22 @@ ExecStart=${worker_cmd}
 
 [Install]
 WantedBy=multi-user.target
-" | ${usrexec} tee ${systemd_dir}/${worker_service}.service > /dev/null
+" | ${usrexec} tee ${systemd_dir}/${worker_service} > /dev/null
 done
 
 
 log "Reloading systemd"
 systemctl daemon-reload
+log "Enabling service: ${instance}.service"
+systemctl enable ${systemd_unit}
 for worker in "${workers[@]}"; do
   eval "unitcmd=\"${worker}\""
   IFS='=' read -r worker_name worker_cmd <<< "$unitcmd"
   worker_service="${instance}-${worker_name}.service"
-  log "Enabling service: ${worker_service}.service"
-  systemctl enable ${worker_service}
+  log "Enabling service: ${worker_service}"
+  systemctl enable ${systemd_dir}/${worker_service}
 done
 
-log "Enabling service: ${instance}.service"
-systemctl enable ${systemd_unit}
 log "Restarting service: ${instance}.service"
 systemctl restart ${instance}.service
 systemctl status ${instance}.service

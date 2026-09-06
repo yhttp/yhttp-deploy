@@ -166,7 +166,7 @@ for worker in "${workers[@]}"; do
     systemctl stop "${worker_service}" \
       || warn "could not stop ${worker_service}"
   fi
-  remove_file ${systemd_dir}/${worker_service}.service
+  remove_file ${systemd_dir}/${worker_service}
 done
 
 
