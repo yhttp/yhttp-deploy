@@ -14,6 +14,7 @@ systemd_unit=${systemd_dir}/${instance}.service
 vardir=/home/${user}/.var
 appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
 APPCLI="${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
+APPPY="${pyenv}/bin/python"
 
 log() {
   printf '[install] %s\n' "$1"
@@ -76,6 +77,11 @@ log "Installing Python packages"
 ${usrexec} ${pip} -vv install ${HERE}/${pydist}
 ${usrexec} ${pip} -vv install uwsgi
 
+# execute user defined commands
+for installexec in "${installexecs[@]}"; do
+  eval "cmd=\"${installexec}\""
+  ${cmd}
+done
 
 # deploy assets
 if [ -n "$(ls -A ${HERE}/assets)" ]; then

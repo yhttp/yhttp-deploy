@@ -5,6 +5,7 @@ shopt -s nullglob
 
 assets=""
 workers=()
+installexecs=()
 xtrace=false
 libdir="$(realpath $(dirname $(readlink -f ${BASH_SOURCE[0]})))"
 outdir=bundles
@@ -110,6 +111,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     --worker)
       workers+=("$2")
+      shift
+      shift
+      ;;
+    --install-exec)
+      installexecs+=("$2")
       shift
       shift
       ;;
@@ -280,6 +286,7 @@ nginxconfigfile=${nginxconfigfile}
 nginxgroup=${nginxgroup}
 " > ${bundledir}/.vars
 declare -p workers >> ${bundledir}/.vars
+declare -p installexecs >> ${bundledir}/.vars
 
 
 # bundle
