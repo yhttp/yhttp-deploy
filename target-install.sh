@@ -261,8 +261,9 @@ WantedBy=multi-user.target
 
 for worker in "${workers[@]}"; do
   eval "unitcmd=\"${worker}\""
-  IFS='=' read -r unit cmd <<< "$unitcmd"
-  log "Writing systemd service unit for worker: ${unit}.service"
+  IFS='=' read -r worker_name worker_cmd <<< "$unitcmd"
+  worker_service="${instance}-${worker_name}.service"
+  log "Writing systemd service unit for worker: ${worker_service}.service"
   echo -n "\
 [Unit]
 Description=${instance} worker
@@ -273,11 +274,11 @@ BindsTo=${systemd_unit}
 [Service]
 User=${user}
 Group=${nginxgroup}
-ExecStart=${cmd}
+ExecStart=${worker_cmd}
 
 [Install]
 WantedBy=multi-user.target
-" | ${usrexec} tee ${systemd_dir}/${unit}.service > /dev/null
+" | ${usrexec} tee ${systemd_dir}/${worker_service}.service > /dev/null
 done
 
 
@@ -285,9 +286,10 @@ log "Reloading systemd"
 systemctl daemon-reload
 for worker in "${workers[@]}"; do
   eval "unitcmd=\"${worker}\""
-  IFS='=' read -r unit cmd <<< "$unitcmd"
-  log "Enabling service: ${unit}.service"
-  systemctl enable ${unit}
+  IFS='=' read -r worker_name worker_cmd <<< "$unitcmd"
+  worker_service="${instance}-${worker_name}.service"
+  log "Enabling service: ${worker_service}.service"
+  systemctl enable ${worker_service}
 done
 
 log "Enabling service: ${instance}.service"

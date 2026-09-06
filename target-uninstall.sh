@@ -29,6 +29,10 @@ fi
 # format.  Validate every value before using it in paths or service commands.
 source "${statefile}"
 
+if ! declare -p workers >/dev/null 2>&1; then
+  workers=()
+fi
+
 valid_name() {
   [[ "$1" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] && [ "$1" != "." ] && [ "$1" != ".." ]
 }
@@ -53,7 +57,8 @@ fi
 pyenv="/home/${user}/.pyenv"
 configdir="/home/${user}/.config"
 vardir="/home/${user}/.var"
-systemd_unit="${configdir}/systemd/user/${instance}.service"
+systemd_dir="${configdir}/systemd/user"
+systemd_unit="${systemd_dir}/${instance}.service"
 nginx_available="/etc/nginx/sites-available/${nginxconfigfile}"
 nginx_enabled="/etc/nginx/sites-enabled/${nginxconfigfile}"
 uninstall_command="/usr/local/bin/${instance}-uninstall.sh"
@@ -140,6 +145,31 @@ if systemctl is-active "${instance}.service" >/dev/null 2>&1; then
   systemctl stop "${instance}.service" || warn "could not stop ${instance}.service"
 fi
 remove_file "${systemd_unit}"
+
+
+for worker in "${workers[@]}"; do
+  eval "unitcmd=\"${worker}\""
+  IFS='=' read -r worker_name worker_cmd <<< "$unitcmd"
+  worker_service="${instance}-${worker_name}.service"
+
+  if systemctl is-enabled "${worker_service}" >/dev/null 2>&1; then
+    if confirm_remove "systemd enablement links for worker service" "${worker_service}"; then
+      log "Disabling worker service: ${worker_service}"
+      systemctl disable "${worker_service}" \
+        || warn "could not disable ${worker_service}"
+    else
+      log "retained enablement for ${worker_service}"
+    fi
+  fi
+  if systemctl is-active "${worker_service}" >/dev/null 2>&1; then
+    log "stopping ${worker_service}"
+    systemctl stop "${worker_service}" \
+      || warn "could not stop ${worker_service}"
+  fi
+  remove_file ${systemd_dir}/${worker_service}.service
+done
+
+
 log "Reloading systemd"
 systemctl daemon-reload || warn "could not reload systemd"
 
