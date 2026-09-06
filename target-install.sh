@@ -15,6 +15,7 @@ vardir=/home/${user}/.var
 appcmd="${usrexec} ${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
 APPCLI="${pyenv}/bin/${pypkg} -c ${configdir}/${pypkg}.yml"
 APPPY="${pyenv}/bin/python"
+APPPY_USER="${usrexec} ${pyenv}/bin/python"
 
 log() {
   printf '[install] %s\n' "$1"
