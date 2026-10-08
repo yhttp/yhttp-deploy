@@ -31,5 +31,6 @@ $(links): $(PREFIX)/bin/yhttp-%: %.sh
 
 .PHONY: install
 install:
-	install -D -t $(PREFIX)/lib/$(TARGET) $(INSTALL_FILES)
+	mkdir -p $(PREFIX)/lib/$(TARGET)
+	install -D $(INSTALL_FILES) $(PREFIX)/lib/$(TARGET)
 	make links	
