@@ -34,3 +34,8 @@ install:
 	mkdir -p $(PREFIX)/lib/$(TARGET)
 	install -D $(INSTALL_FILES) $(PREFIX)/lib/$(TARGET)
 	make links	
+
+.PHONY: uninstall
+uninstall:
+	$(RM) $(links)
+	rm -rf $(PREFIX)/lib/$(TARGET)
