@@ -19,6 +19,10 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --no-database)
+      no_database=true
+      shift
+      ;;
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -58,5 +62,9 @@ sshhost=root@${host}
 ssh ${sshhost} "mkdir ${targettmp}"
 scp ${bundle} ${sshhost}:${targettmp}
 ssh ${sshhost} "tar -xv -C ${targettmp} -f ${targettmp}/${bundletar}"
-ssh ${sshhost} "${targettmp}/${bundledir}/install.sh"
+if [ "${no_database}" = true ]; then
+  ssh ${sshhost} "YHTTP_DEPLOY_NO_DATABASE=true ${targettmp}/${bundledir}/install.sh"
+else
+  ssh ${sshhost} "${targettmp}/${bundledir}/install.sh"
+fi
 ssh ${sshhost} "rm -r ${targettmp}"

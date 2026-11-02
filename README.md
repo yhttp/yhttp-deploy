@@ -13,6 +13,13 @@ sudo make install
 sudo make install PREFIX=/opt
 ```
 
+For a project without a database, pass `--no-database` to `bundle.sh` when
+creating its deployment bundle. The bundle installer will skip database setup.
+
+```bash
+bundle.sh [bundle options] --no-database
+```
+
 
 ## Setup your project:
 Create a `Makefile` in your project's root:

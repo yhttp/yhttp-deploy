@@ -2,6 +2,7 @@
 HERE="$(realpath $(dirname ${BASH_SOURCE[0]}))"
 set -e
 source ${HERE}/.vars
+no_database=${YHTTP_DEPLOY_NO_DATABASE:-${no_database:-false}}
 
 
 # commands
@@ -24,18 +25,21 @@ log() {
 
 # install dependencies
 log "Installing system dependencies"
-apt-get install -y \
+system_dependencies=(
   nginx \
   build-essential \
-  libpq-dev \
   ${pyver}-dev \
   ${pyver}-venv \
-  postgresql \
   redis-server \
   certbot \
   python3-certbot-dns-cloudflare \
   python3-certbot-nginx \
   openssl
+)
+if [ "${no_database}" != "true" ]; then
+  system_dependencies+=(libpq-dev postgresql)
+fi
+apt-get install -y "${system_dependencies[@]}"
 
 
 # copy the uninstall script
@@ -48,8 +52,10 @@ install -D -m 600 ${HERE}/.vars /etc/yhttp-deploy/${instance}.vars
 if [ ! -d "/home/${user}" ]; then
   log "Creating system user: ${user}"
   adduser --disabled-password --gecos '' ${user} 
-  log "Creating PostgreSQL user: ${user}"
-  echo "CREATE USER ${user} WITH CREATEDB" | sudo -u postgres psql
+  if [ "${no_database}" != "true" ]; then
+    log "Creating PostgreSQL user: ${user}"
+    echo "CREATE USER ${user} WITH CREATEDB" | sudo -u postgres psql
+  fi
 fi
 
 
@@ -121,6 +127,11 @@ chown -R ${user}:${nginxgroup} ${vardir}/www/public
 
 # yhttp config file
 log "Writing YHTTP configuration"
+database_config=""
+if [ "${no_database}" != "true" ]; then
+  database_config="db:
+  url: postgresql://:@/${instance}"
+fi
 echo -n "\
 debug: false
 env: production 
@@ -137,8 +148,7 @@ media:
 public:
   serve: false
 
-db:
-  url: postgresql://:@/${instance}
+${database_config}
 
 mako:
   modules: ${vardir}/mako
@@ -232,19 +242,21 @@ chdir = ${configdir}
 
 
 # create database
-if sudo -u postgres psql -lqt | cut -d'|' -f1 | grep -qw ${instance} ; then
-  echo "database ${instance} already created"
-  log "Upgrading existing database: ${instance}"
-  ${appcmd} db migration upgrade
-else
-  log "Creating database: ${instance}"
-  ${appcmd} db create
-  log "Creating database objects: ${instance}"
-  ${appcmd} db objects create
-  log "Inserting database base data: ${instance}"
-  ${appcmd} db basedata insert
-  log "Setting database migration version: ${instance}"
-  ${appcmd} db migration set last
+if [ "${no_database}" != "true" ]; then
+  if sudo -u postgres psql -lqt | cut -d'|' -f1 | grep -qw ${instance} ; then
+    echo "database ${instance} already created"
+    log "Upgrading existing database: ${instance}"
+    ${appcmd} db migration upgrade
+  else
+    log "Creating database: ${instance}"
+    ${appcmd} db create
+    log "Creating database objects: ${instance}"
+    ${appcmd} db objects create
+    log "Inserting database base data: ${instance}"
+    ${appcmd} db basedata insert
+    log "Setting database migration version: ${instance}"
+    ${appcmd} db migration set last
+  fi
 fi
 
 

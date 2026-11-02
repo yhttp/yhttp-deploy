@@ -119,6 +119,10 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --no-database)
+      no_database=true
+      shift
+      ;;
     --)
       shift
       ;;
@@ -137,17 +141,6 @@ if ${xtrace}; then
   set -x
 fi
 
-# # TODO: delete me
-# appcmd="foo"
-# instance="reelio"
-# for worker in "${workers[@]}"; do
-#   eval "unitcmd=\"${worker}\""
-#   IFS='=' read -r worker_name worker_cmd <<< "$unitcmd"
-#   worker_service="${instance}-${worker_name}.service"
-#   echo ${worker_service}
-# done
-# declare -p workers >> deleteme
-# exit
 
 # validation
 if [ -z "${pkgname}" ]; then
@@ -284,6 +277,7 @@ adminemail=${adminemail}
 pyver=${pyver}
 nginxconfigfile=${nginxconfigfile}
 nginxgroup=${nginxgroup}
+no_database=${no_database}
 " > ${bundledir}/.vars
 declare -p workers >> ${bundledir}/.vars
 declare -p installexecs >> ${bundledir}/.vars
