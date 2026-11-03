@@ -206,13 +206,13 @@ auth:
       tokenurl: https://oauth2.googleapis.com/token
 
 
-!include ${configdir}/${pypkg}-${userconfigfile}
+!include ${configdir}/${userconfigfile}-production.yml
 " | ${usrexec} tee ${configdir}/${pypkg}.yml > /dev/null
 
 
 # copy user config file
 log "Copying user configuration"
-cp ${HERE}/${userconfigfile} ${configdir}/${pypkg}-${userconfigfile}
+cp ${HERE}/${userconfigfile} ${configdir}/${userconfigfile}-production.yml
 
 
 # wsgi file
