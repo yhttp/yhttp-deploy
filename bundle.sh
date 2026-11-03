@@ -239,11 +239,12 @@ fi
 
 
 # public files
-if [ -d "${publicdir}" ] && [ -n "$(ls -A ${publicdir})" ]; then
+if [ -d "${publicdir}" ] && \
+    [ -n "$(find "${publicdir}" -mindepth 1 -maxdepth 1 -print -quit)" ]; then
   log "Creating public directory: ${bundledir}/public"
   mkdir -p ${bundledir}/public
   log "Copying public files to ${bundledir}/public"
-  cp -r ${publicdir}/* ${bundledir}/public
+  cp -r ${publicdir}/. ${bundledir}/public/
 fi
 
 
