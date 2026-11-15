@@ -20,6 +20,14 @@ creating its deployment bundle. The bundle installer will skip database setup.
 bundle.sh [bundle options] --no-database
 ```
 
+To add directives to the HTTPS virtual host, repeat `--nginx-configentry`:
+
+```bash
+bundle.sh [bundle options] \
+  --nginx-configentry 'client_max_body_size 32m;' \
+  --nginx-configentry 'add_header X-Frame-Options SAMEORIGIN;'
+```
+
 
 ## Setup your project:
 Create a `Makefile` in your project's root:

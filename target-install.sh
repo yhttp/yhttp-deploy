@@ -356,6 +356,10 @@ fi
 
 
 log "Writing nginx configuration"
+nginx_config_entries=""
+for nginx_configentry in "${nginxconfigentries[@]}"; do
+  nginx_config_entries+="  ${nginx_configentry}"$'\n'
+done
 echo -n "\
 # Managed by yhttp-deploy: instance=${instance}
 server {
@@ -375,6 +379,7 @@ server {
   include /etc/letsencrypt/options-ssl-nginx.conf;
   ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
+${nginx_config_entries}
   location /assets {
     alias ${vardir}/www/assets;
   }
