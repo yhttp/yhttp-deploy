@@ -11,4 +11,5 @@
   virtual host.
 
 ## task3
-- [] check subdomain and SSL
+- [x] update readme and mention all bundle.sh and deploy.sh arguments,
+  options and flags with example.
